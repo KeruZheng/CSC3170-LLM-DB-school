@@ -1,0 +1,18 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+gptcache = "*"
+python-dotenv = "*"
+matplotlib = "*"
+plotly = "*"
+tenacity = "*"
+pandas = "*"
+openai = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.11"
