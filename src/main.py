@@ -24,8 +24,29 @@ os.environ["http_proxy"] = "http://127.0.0.1:10809"
 class LLM:
     def __init__(self):
         self.cache = Cache('llm_cache.cache')
+    
+    # Define the schema to be included in the system message
+        self.schema = {
+            "School": ["Name", "Location", "Website", "Dean", "Establishment Year", "School average GPA", "Scholarships"],
+            "Student": ["StudentID", "Name", "E-mail", "Gender", "Year", "Major", "GPA", "School", "College", 
+                        "Tuition fees", "Scholarships", "Financial Aids", "Honors and Rewards", "Nation", 
+                        "Phone Numbers", "Mailing Address", "Emergency Contact", "Graduate Status"],
+            "Professor": ["InstructorID", "Name", "Gender", "E-mail", "Title", "School", "Office", "Teaching Assignments", 
+                          "Publications", "Year", "Salary", "Education Background", "Research Field"],
+            "Ph.D. Student": ["StudentID", "Salary", "Teaching Assistant", "Supervisor", "Lab", "Research Field", "Education Background"],
+            "Course": ["CourseID", "Course Name", "Career", "Credits", "Section", "Component", "Schedule", 
+                       "Year", "Instructor", "TA", "Grade distribution", "Quota", "Location"],
+            "Major": ["Name", "School", "School Package", "Establishment Year"],
+            "Lab": ["LabID", "Instructor", "Student", "Funding", "Phone Number", "E-mail", "Address", "Fields", "Subject"],
+            "College": ["Name", "College descriptions", "Office", "Budget", "Location", "Dean", "Establishment Year"],
+            "College Tutor": ["StudentID", "College+flat+floor (shaw C7)"],
+            "Club/Activity": ["ClubID", "Club Name", "President", "Club members", "Budget"]
+        }
 
     async def openai_completion(self, command, system_message, history):
+        schema_message = "The following is the schema for the database entities and their attributes:\n" + json.dumps(self.schema, ensure_ascii=False, indent=2)
+        full_system_message = schema_message + "\n" + system_message
+
         cache_key = "|".join([command, system_message, str(history)])
         cached_response = self.cache.get(cache_key)
 
@@ -35,7 +56,7 @@ class LLM:
         response = await openai.ChatCompletion.acreate(
             model=os.environ.get('OPENAI_DEFAULT_MODEL'),
             messages=[
-                {"role": "system", "content": system_message},
+                {"role": "system", "content": full_system_message},
                 *history,
                 {"role": "user", "content": command}
             ],
